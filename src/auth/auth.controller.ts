@@ -11,7 +11,7 @@ import {
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
 import { Public } from './public.decorator';
-import { User } from '../users/users.model';
+import { User } from '../users/users.entity';
 
 @Controller('auth')
 export class AuthController {
