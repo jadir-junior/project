@@ -1,7 +1,12 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../users/users.entity';
+import { checkPasswordValidation } from '../utils/check-password-validation/check-password-validation';
 
 type AccessToken = {
   access_token: string;
@@ -31,6 +36,8 @@ export class AuthService {
   }
 
   async register(register: Omit<User, 'id'>): Promise<AccessToken> {
+    this.validatePassword(register.password);
+
     const user = await this.usersService.create(register);
 
     return this.generateAccessToken(user);
@@ -44,5 +51,47 @@ export class AuthService {
     return {
       access_token: await this.jwtService.signAsync(payload),
     };
+  }
+
+  private validatePassword(password: string): void {
+    const errors = [];
+
+    const isWhiteSpace = checkPasswordValidation.isWhiteSpace(password);
+    if (isWhiteSpace) {
+      errors.push(isWhiteSpace);
+    }
+
+    const isNotContainsUppercase =
+      checkPasswordValidation.isContainsUppercase(password);
+    if (isNotContainsUppercase) {
+      errors.push(isNotContainsUppercase);
+    }
+
+    const isNotContainsLowercase =
+      checkPasswordValidation.isContainsLowercase(password);
+    if (isNotContainsLowercase) {
+      errors.push(isNotContainsLowercase);
+    }
+
+    const isNotContainsNumber =
+      checkPasswordValidation.isContainsNumber(password);
+    if (isNotContainsNumber) {
+      errors.push(isNotContainsNumber);
+    }
+
+    const isNotContainsSymbol =
+      checkPasswordValidation.isContainsSymbol(password);
+    if (isNotContainsSymbol) {
+      errors.push(isNotContainsSymbol);
+    }
+
+    const isNotValidLength = checkPasswordValidation.isValidLength(password);
+    if (isNotValidLength) {
+      errors.push(isNotValidLength);
+    }
+
+    if (errors.length) {
+      throw new BadRequestException(errors);
+    }
   }
 }
