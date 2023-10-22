@@ -21,7 +21,7 @@ export class UsersService {
   async create(register: Omit<User, 'id'>): Promise<User> {
     const { username, password } = register;
 
-    const isUserCreated = this.findByUsername(username);
+    const isUserCreated = await this.findByUsername(username);
 
     if (isUserCreated) {
       throw new ConflictException('User already exist');
